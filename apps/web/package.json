@@ -10,7 +10,11 @@
   },
   "dependencies": {
     "@repo/ui": "*",
+    "@types/argon2": "^0.14.1",
+    "argon2": "^0.41.1",
+    "bcrypt": "^5.1.1",
     "next": "14.2.6",
+    "next-auth": "^4.24.10",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },

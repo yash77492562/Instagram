@@ -1,0 +1,19 @@
+{
+  "name": "@repo/prisma_database",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "exports": {
+    "./client": "./src/prisma.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.21.1",
+    "prisma": "^5.21.1"
+  }
+}
