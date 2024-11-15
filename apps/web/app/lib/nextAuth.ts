@@ -1,10 +1,12 @@
 import  CredentialsProvider  from "next-auth/providers/credentials";
-import {User as NextAuthUser,Session as NextAuthSession} from "next-auth"
+import {User as NextAuthUser,Session as NextAuthSession} from "next-auth";
 import *  as argon2   from "argon2";
-import {prisma} from '@repo/prisma_database/client'
-import { check_username_details } from "../database/details_check/user_authincate";
-import {encrypt} from "@repo/encrypt/client"
+import {prisma} from '@repo/prisma_database/client';
+import {  check_username_details } from "../database/details_check/user_authincate";
+import {encrypt} from "@repo/encrypt/client";
 import   {JWT} from "next-auth/jwt";
+import { generateSecureTokenWithSalt } from "../backend/generate_token";
+import { create_userNode_graph } from "../graph_database_query/graph_database";
 
 export const authOptions = {
     providers:[
@@ -28,11 +30,9 @@ export const authOptions = {
                     let User_details;
             
                     // Check if user exists
-                    const existingUser = await check_username_details({ username });
-                    console.log(existingUser)
+                    const existingUser = await check_username_details({ username});
             
                     if (!existingUser) {
-                        console.log('user does not exist')
                         // Create new user
                         const hashedPassword = await argon2.hash(password, {
                             type: argon2.argon2id,
@@ -40,28 +40,49 @@ export const authOptions = {
                             timeCost: 3,
                             parallelism: 4,
                         });
-                        console.log(hashedPassword)
                         const encryptEmail = encrypt(email);
-                        console.log(encryptEmail)
                         const encryptUsername = encrypt(username);
                         const encryptPhone = encrypt(phone);
+                        const Usertoken = generateSecureTokenWithSalt(username)
+                        const Emailtoken = generateSecureTokenWithSalt(email)
+                        const Phonetoken = generateSecureTokenWithSalt(password)
             
                         try {
                             const transactionResult = await prisma.$transaction(async (tx) => {
                                 const newUser = await tx.user.create({
                                     data: {
-                                        usernme: encryptUsername,
+                                        username: encryptUsername,
                                         password: hashedPassword,
                                         email: encryptEmail,
                                         phone: encryptPhone,
+                                        tags:['GAMES']
                                     },
                                 });
+                                await tx.username_token.create({
+                                    data:{
+                                        token:Usertoken,
+                                        userId:newUser.id
+                                    }
+                                })
+                                await tx.email_token.create({
+                                    data:{
+                                        token:Emailtoken,
+                                        userId:newUser.id
+                                    }
+                                })
+                                await tx.phone_token.create({
+                                    data:{
+                                        token:Phonetoken,
+                                        userId:newUser.id
+                                    }
+                                })
+                                const result = await create_userNode_graph(newUser.id)
                                 return newUser;
                             });
                             User_details = transactionResult;
                             return {
                                 id: User_details.id,
-                                name: User_details.usernme,
+                                name: User_details.username,
                             };
                         } catch (error) {
                             console.error('Database Connection break', error);
@@ -70,7 +91,7 @@ export const authOptions = {
                     } else {
                         // Validate existing user
                         const isValidPassword = await argon2.verify(
-                            existingUser.password,
+                            existingUser.user.password,
                             password
                         );
                         if (!isValidPassword) {
@@ -78,8 +99,8 @@ export const authOptions = {
                             return null;
                         }
                         return {
-                            id: existingUser.id,
-                            name: existingUser.usernme,
+                            id: existingUser.user.id,
+                            name: existingUser.user.username,
                         };
                     }
                 } catch (error) {
@@ -90,7 +111,7 @@ export const authOptions = {
             
           })
         ],
-        secret: process.env.JWT_SECRET || 'dfkejkvkjds@djfsjefDFE',
+        secret: process.env.JWT_SECRET,
         callbacks: {
           async session({ session, token }: { session: NextAuthSession; token: JWT }) {
             if (token && session.user) {

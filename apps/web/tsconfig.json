@@ -1,6 +1,9 @@
 {
   "extends": "@repo/typescript-config/nextjs.json",
   "compilerOptions": {
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
     "plugins": [
       {
         "name": "next"
@@ -12,7 +15,8 @@
     "next.config.mjs",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts", 
+    "src/utils/cloudinary-loader.js"
   ],
   "exclude": ["node_modules"]
 }

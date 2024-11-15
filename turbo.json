@@ -1,6 +1,8 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalDependencies": ["**/.env.*local"],
+  "globalEnv": ["ENCRYPTION_KEY","NEXT_PUBLIC_CLOUDINARY_API_SECRET","CLOUDINARY_API_SECRET","NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME","CLOUDINARY_CLOUD_NAME","NEXT_PUBLIC_CLOUDINARY_API_KEY", "CLOUDINARY_API_KEY", "SECRET_KEY", "JWT_SECRET","HUGGINGFACE_ACCESS_TOKEN"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -11,6 +13,14 @@
       "dependsOn": ["^lint"]
     },
     "dev": {
+      "env": ["ENCRYPTION_KEY", "SECRET_KEY_NUMBER", "JWT_SECRET","HUGGINGFACE_ACCESS_TOKEN"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env.development.local",
+        ".env.local",
+        ".env.development",
+        ".env"
+      ],
       "cache": false,
       "persistent": true
     }

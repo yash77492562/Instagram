@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 
-const key = process.env.ENCRYPTION_KEY || 'awodnfDdfpse#teis';
+const key = process.env.ENCRYPTION_KEY || process.env.NEXT_PUBLIC_ENCRYPTION_KEY ;
+console.log(process.env.ENCRYPTION_KEY , 'key is this ')
 
 export const encrypt = (data: string): string => {
     console.log(data);
@@ -16,6 +17,7 @@ export const encrypt = (data: string): string => {
 };
 
 export const decrypt = (encryptedData: string): string => {
+    console.log(process.env.NEXT_PUBLIC_ENCRYPTION_KEY ,'this is NEXT_PUBLIC_KEY')
     if (key === undefined) {
         return 'key not found';
     }

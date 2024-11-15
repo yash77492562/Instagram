@@ -1,0 +1,174 @@
+// "use client";
+// import { CldImage } from 'next-cloudinary';
+
+// // By default, the CldImage component applies auto-format and auto-quality to all delivery URLs for optimized delivery.
+// export default function ImageUpload() {
+//   return (
+//     <CldImage
+//       src="samples/people/jazz" // Use this sample image or upload your own via the Media Explorer
+//       width="500" // Transform the image: auto-crop to square aspect_ratio
+//       height="500"
+//       alt=''
+//       priority
+//       // crop={{
+//       //   type: 'auto',
+//       //   source: true
+//       // }}
+//       remove="women with raised hands"
+//       replace={['saxophone','holding rose']}
+//     />
+//   );
+// }
+
+'use client'
+// generate image caption using Cloudinary AI
+import type { CloudinaryUploadWidgetInfo } from "next-cloudinary";
+import { CldUploadWidget, CldImage } from "next-cloudinary";
+import { useState } from 'react';
+
+// Define the type for the AI captioning result
+interface CaptioningResult {
+  caption: string;
+}
+
+interface CloudinaryInfo {
+  detection?: {
+    captioning?: {
+      data?: CaptioningResult;
+    };
+  };
+}
+
+export default function ImageUploadWithCaption() {
+  const [result, setResult] = useState<CloudinaryUploadWidgetInfo | null>(null);
+
+  return (
+    <main className="p-16 text-center">
+      <h1 className="text-5xl font-medium py-8">Image Upload App</h1>
+      <section className="flex flex-col items-center justify-between">
+        <CldUploadWidget
+          signatureEndpoint="/api/sign-image"
+          onSuccess={(result) => {
+            setResult(result?.info as CloudinaryUploadWidgetInfo);
+          }}
+          options={{
+            detection: 'captioning',
+            on_success:'current_assest.update({context:{alt:e.upload_info?.info?.detection?.captioning?.data?.caption}})',
+          }}
+        >
+          {({ open }) => <button onClick={() => open()}>Upload an Image</button>}
+        </CldUploadWidget>
+        {result ? (
+          // Type-check result.info as CloudinaryInfo to access detection.captioning
+          <CldImage
+            src={result.public_id}
+            width={result.width}
+            height={result.height}
+            alt={
+              (result.info as CloudinaryInfo).detection?.captioning?.data?.caption ||
+              'No caption available'
+            }
+          />
+        ) : null}
+      </section>
+    </main>
+  );
+}
+// alt={result.context.custom.alt}
+// npm install @huggingface/inference node-fetch
+//  in order to read a image and provide a best possible image name and  alt 
+
+
+// cloudinary.v2.api
+  // .delete_resources(['samples/people/boy-snow-hoodie'], 
+  //   { type: 'upload', resource_type: 'image' })
+  // .then(console.log);
+
+  // cloudinary.v2.uploader
+  // .upload('ran.webp', {
+  //   folder: '',
+  //   resource_type: 'image'})
+  // .then(console.log);
+
+  // cloudinary.v2.api
+  // .create_folder('images')
+  // .then(console.log);
+
+  // cloudinary.v2.api
+  // .delete_folder('/images')
+  // .then(console.log);
+
+
+  'use client'
+import { CldImage } from "next-cloudinary";
+export default function GetImageCloudinary(){
+    return (
+        <main className="flex h-full min-h-screen  flex-col justify-center items-center">
+            <div className="max-w-lg">
+                <CldImage
+                   width="600"
+                   height="800"
+                   src='cld-sample-4'
+                   alt="Phone,sunglasses, and watch on desk"
+                   sizes="100vw"
+                   fillBackground={{
+                    gravity:'west'
+                   }}
+                   overlays={[{
+                    publicId:'examples/white',
+                    width:1500,
+                    height:500,
+                    position:{
+                        x:0,
+                        y:0,
+                        gravity:'east',
+                    },
+                    effects:[{
+                        opacity:50,
+                        overlay:true,
+                        colorize:"100,co_rgb:3a552d"
+                    }
+                    ]
+                    
+                   },
+                    {
+                        width:1200,
+                        crop:'fit',
+                        position:{
+                            x:300,
+                            y:0,
+                            gravity:'east'
+                        },
+                        text:{
+                            color:'white',
+                            fontFamily:'Source Sans Pro',
+                            fontSize:160,
+                            fontWeight:'bold',
+                            text:'Radiant Skin,Revived Beauty'
+                        }
+                    }
+                   ]}
+                   />
+            </div>
+        </main>
+    )
+}
+
+'use client'
+import NextImage from 'next/image'
+import CloudinaryLoader from '../../src/utils/cloudinary-loader'
+export function GetImage(){
+    return (
+        <main>
+            <NextImage 
+               className=''
+               src='cld-sample-4.jpg'
+               loader={CloudinaryLoader}
+               alt='a photo of a bridge'
+               width={640}
+               height={360}
+               priority
+               />
+        </main>
+    )
+}

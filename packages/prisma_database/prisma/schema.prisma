@@ -1,16 +1,68 @@
-generator client{
-    provider = "prisma-client-js"
-} 
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
-    provider = "postgresql"
-    url = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-    id String @id @default(uuid())
-    usernme String @unique
-    password String 
-    email String @unique
-    phone String @unique
+  id             String           @id @default(uuid())
+  username       String           @unique
+  password       String
+  email          String           @unique
+  phone          String           @unique
+  tags           Tag[]           
+  username_token Username_token[] // Relation to Username_token model
+  image Image[]
+}
 
+model Username_token {
+  id     String @id @default(uuid())
+  token  String
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+model Image{
+  id  String  @id @default(uuid())
+  display_name String 
+  tags String[]
+  public_id String
+  resource_type String
+  secure_url String
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model ImagePosition {
+  id          Int      @id @default(autoincrement())
+  image_id    String   @unique
+  index       Int
+  position_x  Int
+  position_y  Int
+  zoom        Float
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([image_id])
+}
+
+model Email_token {
+  token  String
+  userId String @unique
+}
+
+model Phone_token {
+  token  String
+  userId String @unique
+}
+
+
+
+// Enum for tags
+enum Tag {
+  TRAVELLING
+  GAMES
+  ADVENTURE
 }

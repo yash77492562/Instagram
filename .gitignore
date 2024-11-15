@@ -4,6 +4,8 @@
 node_modules
 .pnp
 .pnp.js
+ neo.txt
+ extra.txt
 
 # Local env files
 .env
