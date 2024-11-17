@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState, MouseEvent } from 'react';
-import { ImageDisplay } from '@repo/ui/imageDisplay';
+import {ImageDisplay} from '@repo/ui/imageDisplay';
 import { Post } from '../component/profileView';
 
 type CloudinaryResource = {

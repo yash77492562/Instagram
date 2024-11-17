@@ -1,0 +1,471 @@
+CldImage Component
+1. Background Removal
+    eg  import { CldImage } from 'next-cloudinary';
+ 
+        <CldImage
+          width="960"
+          height="600"
+          src="<Your Public ID>"
+          sizes="100vw"
+          removeBackground
+          alt=""
+        />
+2. Color Background
+    eg:-import { CldImage } from 'next-cloudinary';
+ 
+        <CldImage
+          width="960"
+          height="600"
+          src="<Your Public ID>"
+          sizes="100vw"
+          removeBackground
+          background="blueviolet"
+          alt=""
+        />
+Don't need to include Image Background  in our CldImage component
+3.Image Background 
+    Underlay:-
+    Eg    import { CldImage } from 'next-cloudinary';
+ 
+        <CldImage
+          width="960"
+          height="600"
+          src="<Your Public ID>"
+          sizes="100vw"
+          removeBackground
+          underlay="<Your Public ID>"
+          alt=""
+        />
+
+4.Cropping and Resizing
+    cropping:- import { CldImage } from 'next-cloudinary';
+ 
+                <CldImage
+                  src="<Your Public ID>"
+                  width="300"
+                  height="300"
+                  crop={{
+                    type: 'thumb',
+                    width: 600,
+                    height: 600,
+                    source: true
+                  }}
+                  alt=""
+                  sizes="100vw"
+                />
+                import { CldImage } from 'next-cloudinary';
+ 
+                <CldImage
+                  src="<Your Public ID>"
+                  width="300"
+                  height="300"
+                  crop={{
+                    type: 'crop',
+                    width: 400,
+                    height: 400,
+                    x: 80,
+                    y: 350,
+                    gravity: 'north_east',
+                    source: true
+                  }}
+                  alt=""
+                  sizes="100vw"
+                />
+                import { CldImage } from 'next-cloudinary';
+ 
+                <div style={{ position: 'relative', aspectRatio: '16 / 9' }}>
+                  <CldImage
+                    src="<Your Public ID>"
+                    sizes="100vw"
+                    aspectRatio="16:9"
+                    crop="fill"
+                    fill={true}
+                    alt=""
+                  />
+                </div>
+
+Generative Fill 
+    1. fillBackground:- import { CldImage } from 'next-cloudinary';
+ 
+                        <CldImage
+                          src="<Your Public ID>"
+                          width="1400" //Original width 900
+                          height="600"
+                          crop="pad"  // Returns the given size with padding
+                          fillBackground
+                          alt=""
+                          sizes="100vw"
+                        />
+    2.Generative removeBackground
+        remove:-import { CldImage } from 'next-cloudinary';
+ 
+                <CldImage
+                  src="<Your Public ID>"
+                  width="960"
+                  height="600"
+                  remove={{
+                  prompt: '<Object>',
+                  removeShadow: true
+                }}
+                  alt=""
+                  sizes="100vw"
+                />
+    3.Generativ Replace:-
+        replace :- import { CldImage } from 'next-cloudinary';
+ 
+                   <CldImage
+                     width="960"
+                     height="960"
+                     crop="fill"
+                     src="<Your Public ID>"
+                     replace={['turtle', 'shark']}
+                     alt=""
+                     sizes="100vw"
+                   />
+    4.Generative Replace Background
+        replaceBackground:- import { CldImage } from 'next-cloudinary';
+ 
+                            <CldImage
+                              src="<Your Public ID>"
+                              width="960"
+                              height="600"
+                              replaceBackground="<Prompt>"
+                              alt=""
+                              sizes="100vw"
+                            />
+    5.Generative Restore:-
+        restore:- import { CldImage } from 'next-cloudinary';
+ 
+                  <CldImage
+                    src="<Your Public ID>"
+                    width="960"
+                    height="600"
+                    crop="fill"
+                    restore
+                    sizes="100vw"
+                    alt=""
+                  />
+
+Filters and Effects:-
+    1.Blur:- import { CldImage } from 'next-cloudinary';
+             <CldImage
+               width="960"
+               height="600"
+               src="<Your Public ID>"
+               sizes="100vw"
+               blur="1200"
+               alt=""
+             />
+    2.Grayscale:-import { CldImage } from 'next-cloudinary';
+ 
+                 <CldImage
+                   width="960"
+                   height="600"
+                   src="<Your Public ID>"
+                   sizes="100vw"
+                   grayscale
+                   alt=""
+                 />
+    3. opacity:- import { CldImage } from 'next-cloudinary';
+ 
+                  <CldImage
+                    width="960"
+                    height="600"
+                    src="<Your Public ID>"
+                    sizes="100vw"
+                    opacity="50"
+                    alt=""
+                  />
+    4.Tint:- import { CldImage } from 'next-cloudinary';
+ 
+             <CldImage
+               width="960"
+               height="600"
+               src="<Your Public ID>"
+               sizes="100vw"
+               tint="equalize:80:blue:blueviolet"
+               alt=""
+             />
+
+Don't include Replace Background with Multiple Images
+replaceBackground with Multiple Images
+    underlay:- import { CldImage } from 'next-cloudinary';
+ 
+               <CldImage
+                 width="960"
+                 height="600"
+                 src="<Your Public ID>"
+                 sizes="100vw"
+                 removeBackground
+                 underlays={[
+                   {
+                     publicId: '<Public ID>',
+                     width: '0.5',
+                     height: '1.0',
+                     crop: 'fill',
+                     position: {
+                       gravity: 'north_west'
+                     },
+                     flags: ['relative']
+                   },
+                   {
+                     publicId: '<Public ID>',
+                     width: '0.5',
+                     height: '1.0',
+                     crop: 'fill',
+                     position: {
+                       gravity: 'south_east'
+                     },
+                     flags: ['relative']
+                   },
+                 ]}
+                 alt=""
+                 sizes="100vw"
+               />
+  
+Text Overlays:
+    Adding custom Text 
+        overlays:- import { CldImage } from 'next-cloudinary';
+ 
+                   <CldImage
+                     width="1335"
+                     height="891"
+                     src="<Your Public ID>"
+                     sizes="100vw"
+                     overlays={[{
+                       position: {
+                         x: 140,
+                         y: 140,
+                         angle: -20,
+                         gravity: 'south_east',
+                       },
+                       text: {
+                         color: 'blueviolet',
+                         fontFamily: 'Source Sans Pro',
+                         fontSize: 280,
+                         fontWeight: 'bold',
+                         textDecoration: 'underline',
+                         letterSpacing: 14,
+                         text: 'Cool Beans'
+                       }
+                     }]}
+                     alt=""
+                   />
+    
+    Adding Text with Effects:-
+        effects:-import { CldImage } from 'next-cloudinary';
+ 
+            <CldImage
+              width="1335"
+              height="891"
+              src="<Your Public ID>"
+              sizes="100vw"
+              overlays={[{
+                text: {
+                  color: 'white',
+                  fontFamily: 'Source Sans Pro',
+                  fontSize: 400,
+                  fontWeight: 'black',
+                  text: 'Touching Grass'
+                },
+                effects: [
+                  {
+                    shear: '40:0',
+                    opacity: 50
+                  }
+                ]
+              }]}
+              alt=""
+            />
+
+
+
+
+
+
+
+            // modifyImage.tsx
+import React, { useState } from "react";
+import { ImageDisplay } from "@repo/ui/imageDisplay";
+import { Card, CardContent } from "../card";
+import { Slider } from "../slider";
+import { Switch } from "../switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../select";
+import { Label } from "../label";
+import { Button } from "../button";
+
+type ImageResource = {
+  current_index: number;
+  public_id: string;
+  secure_url: string;
+  alt: string;
+};
+
+interface ModifyImageProps {
+  image: ImageResource;
+}
+
+export const ModifyImage = ({ image }: ModifyImageProps) => {
+  const [transformations, setTransformations] = useState({
+    blur: "0",
+    grayscale: false,
+    opacity: "100",
+    removeBackground: false,
+    fillBackground: false,
+    crop: "pad" as "pad" | "fill" | "crop" | "thumb" | "scale" | "fit",
+    gravity: "north" as const,
+  });
+
+  const resetTransformations = () => {
+    setTransformations({
+      blur: "0",
+      grayscale: false,
+      opacity: "100",
+      removeBackground: false,
+      fillBackground: false,
+      crop: "pad",
+      gravity: "north",
+    });
+  };
+
+  return (
+    <div className="w-full min-h-screen bg-gray-100 p-6 flex flex-col md:flex-row gap-6">
+      <Card className="md:w-1/3 h-fit">
+        <CardContent className="p-6 space-y-6">
+          <div className="space-y-4">
+            {/* Blur */}
+            <div className="space-y-2">
+              <Label>Blur</Label>
+              <Slider
+                value={[parseInt(transformations.blur)]}
+                onValueChange={([value]) => {
+                  if (value !== undefined) {
+                    setTransformations((prev) => ({
+                      ...prev,
+                      blur: value.toString(),
+                    }));
+                  }
+                }}
+                min={0}
+                max={2000}
+                step={1}
+              />
+            </div>
+
+            {/* Opacity */}
+            <div className="space-y-2">
+              <Label>Opacity</Label>
+              <Slider
+                value={[parseInt(transformations.opacity)]}
+                onValueChange={([value]) => {
+                  if (value !== undefined) {
+                    setTransformations((prev) => ({
+                      ...prev,
+                      opacity: value.toString(),
+                    }));
+                  }
+                }}
+                min={0}
+                max={100}
+                step={1}
+              />
+            </div>
+
+            {/* Grayscale */}
+            <div className="flex items-center justify-between">
+              <Label>Grayscale</Label>
+              <Switch
+                checked={transformations.grayscale}
+                onCheckedChange={(checked) =>
+                  setTransformations((prev) => ({
+                    ...prev,
+                    grayscale: checked,
+                  }))
+                }
+              />
+            </div>
+
+            {/* Remove Background */}
+            <div className="flex items-center justify-between">
+              <Label>Remove Background</Label>
+              <Switch
+                checked={transformations.removeBackground}
+                onCheckedChange={(checked) =>
+                  setTransformations((prev) => ({
+                    ...prev,
+                    removeBackground: checked,
+                  }))
+                }
+              />
+            </div>
+
+            {/* Fill Background */}
+            <div className="flex items-center justify-between">
+              <Label>Fill Background</Label>
+              <Switch
+                checked={transformations.fillBackground}
+                onCheckedChange={(checked) =>
+                  setTransformations((prev) => ({
+                    ...prev,
+                    fillBackground: checked,
+                  }))
+                }
+              />
+            </div>
+
+            {/* Crop Mode */}
+            <div className="space-y-2">
+              <Label>Crop Mode</Label>
+              <Select
+                value={transformations.crop}
+                onValueChange={(value) =>
+                  setTransformations((prev) => ({
+                    ...prev,
+                    crop: value as typeof transformations.crop,
+                  }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select crop mode" />
+                </SelectTrigger>
+                <SelectContent>
+                  {["pad", "fill", "crop", "thumb", "scale", "fit"].map((mode) => (
+                    <SelectItem key={mode} value={mode}>
+                      {mode}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button
+              onClick={resetTransformations}
+              variant="outline"
+              className="w-full"
+            >
+              Reset All
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="md:w-2/3 bg-black rounded-lg flex justify-center items-center p-6">
+        <ImageDisplay
+          public_id={image.public_id}
+          secure_url={image.secure_url}
+          alt={image.alt}
+          type="view"
+          transformations={transformations}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default ModifyImage;

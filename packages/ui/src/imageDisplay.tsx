@@ -1,344 +1,109 @@
-// 'use client';
-// import { CldImage } from "next-cloudinary";
-// import { MouseEvent } from 'react';
+'use client';
 
-// interface ImageDisplayProps {
-//     public_id: string;
-//     alt: string;
-//     secure_url: string;
-//     type: 'profile' | 'view';
-//     crop?: "limit" | 'fill'
-//     onClick?: (e: MouseEvent<HTMLDivElement>) => void;
-// }
-
-// export const ImageDisplay = ({ 
-//     public_id, 
-//     alt, 
-//     secure_url, 
-//     type,
-//     crop,
-//     onClick 
-// }: ImageDisplayProps) => {
-//     const isProfile = type === 'profile';
-    
-//     if (isProfile) {
-//         // Profile images are always square
-//         return (
-//             <div 
-//                 onClick={onClick}
-//                 className="relative w-[250px] h-[250px] cursor-pointer"
-//             >
-//                 <CldImage
-//                     key={public_id}
-//                     src={secure_url}
-//                     alt={alt}
-//                     width={250}
-//                     height={250}
-//                     aspectRatio="1.0"
-//                     crop="fill"
-//                     gravity="auto:face"
-//                     className="object-cover hover:opacity-90 transition-opacity duration-200 rounded-sm"
-//                 />
-//             </div>
-//         );
-//     }
-
-//     // View type - adaptive sizing with max bounds
-//     return (
-//         <div 
-//             onClick={onClick}
-//             className="relative  cursor-pointer w-[450] h-[550] max-w-[450px] max-h-[550px] min-h-[350px]  flex items-center justify-center"
-//         >
-//             <CldImage
-//                 key={public_id}
-//                 src={secure_url}
-//                 alt={alt}
-//                 width={450}
-//                 height={550}
-//                 crop="fill" 
-//                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-//                 className="w-auto h-auto max-w-full max-h-[550px] hover:opacity-90 transition-opacity duration-200 rounded-sm"
-//                 priority={true}
-//             />
-//         </div>
-//     );
-// };
-
-
-'use client'
-import React, { MouseEvent, useState, useRef, useEffect } from 'react';
 import { CldImage } from "next-cloudinary";
-import { Button } from "@repo/ui/button";
-import { 
-  Settings2, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, 
-  ZoomIn, ZoomOut, Maximize2, RotateCcw, X 
-} from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { MouseEvent } from "react";
 
-interface Position {
-  x: number;  // -100 to 100
-  y: number;  // -100 to 100
-  zoom: number; // 1.0 to 2.0
-}
+// Define valid crop types and flags
+type ValidCropMode = 
+  | "thumb" 
+  | "crop" 
+  | "fill" 
+  | "pad" 
+  | "auto" 
+  | "fill_pad" 
+  | "fit" 
+  | "imagga_crop" 
+  | "imagga_scale" 
+  | "lfill" 
+  | "limit" 
+  | "lpad" 
+  | "mfit" 
+  | "mpad" 
+  | "scale";
 
-interface DragState {
-  isDragging: boolean;
-  startX: number;
-  startY: number;
-  startPositionX: number;
-  startPositionY: number;
-}
+type CropConfig = {
+  type: ValidCropMode;
+  width?: number;
+  height?: number;
+  x?: number;
+  y?: number;
+  gravity?: 'north_east' | 'south_east' | 'north_west' | 'south_west' | 'north' | 'south' | 'east' | 'west';
+  source?: boolean;
+};
+
+type CloudinaryTransformations = {
+  width?: number;
+  height?: number;
+  crop?: ValidCropMode | CropConfig; // Accepts custom crop configuration
+  aspectRatio?: string;
+  removeBackground?: boolean;
+  background?: string;
+  fillBackground?: boolean;
+  blur?: string;
+  grayscale?: boolean;
+  opacity?: string;
+};
 
 interface ImageDisplayProps {
   public_id: string;
   alt: string;
   secure_url: string;
   type: 'profile' | 'view';
-  initialPosition?: Position;
-  imageIndex?: number;
-  onPositionChange?: (imageId: string, index: number, position: Position) => void;
   onClick?: (e: MouseEvent<HTMLDivElement>) => void;
+  transformations?: CloudinaryTransformations;
+  sizes?: string;
+  fill?: boolean;
 }
 
-const DEFAULT_POSITION: Position = { x: 0, y: 0, zoom: 1.0 };
+const DEFAULT_PROFILE_CONFIG: CloudinaryTransformations = {
+  width: 250,
+  height: 250,
+  crop: 'fill' as ValidCropMode,
+};
+
+const DEFAULT_VIEW_CONFIG: CloudinaryTransformations = {
+  width: 450,
+  height: 550,
+  crop: 'pad' as ValidCropMode,
+};
 
 export const ImageDisplay = ({
   public_id,
   alt,
   secure_url,
   type,
-  initialPosition = DEFAULT_POSITION,
-  imageIndex = 0,
-  onPositionChange,
-  onClick
+  onClick,
+  transformations = {},
+  ...props
 }: ImageDisplayProps) => {
-  const [position, setPosition] = useState<Position>(initialPosition);
-  const [showControls, setShowControls] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
-  const [dragState, setDragState] = useState<DragState>({
-    isDragging: false,
-    startX: 0,
-    startY: 0,
-    startPositionX: 0,
-    startPositionY: 0
-  });
+  const isProfile = type === 'profile';
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const touchTimeoutRef = useRef<NodeJS.Timeout>();
-  const positionRef = useRef(position);
+  const containerClasses = isProfile
+    ? "relative w-[250px] h-[250px] cursor-pointer"
+    : "relative cursor-pointer w-[450px] h-[550px] max-w-[450px] max-h-[550px] min-h-[350px] flex items-center justify-center";
 
-  useEffect(() => {
-    positionRef.current = position;
-  }, [position]);
+  const imageClasses = isProfile
+    ? "object-cover hover:opacity-90 transition-opacity duration-200 rounded-sm"
+    : "w-auto h-auto max-w-full max-h-[550px] hover:opacity-90 transition-opacity duration-200 rounded-sm";
 
-  const updatePosition = (updates: Partial<Position>) => {
-    const newPosition = {
-      ...position,
-      ...updates,
-      x: Math.max(-100, Math.min(100, 'x' in updates ? updates.x! : position.x)),
-      y: Math.max(-100, Math.min(100, 'y' in updates ? updates.y! : position.y)),
-      zoom: Math.max(1.0, Math.min(2.0, 'zoom' in updates ? updates.zoom! : position.zoom))
-    };
-    setPosition(newPosition);
-    onPositionChange?.(public_id, imageIndex, newPosition);
+  const config = {
+    ...(isProfile ? DEFAULT_PROFILE_CONFIG : DEFAULT_VIEW_CONFIG),
+    ...transformations, // Merge user-defined transformations
+    crop: transformations.crop || DEFAULT_VIEW_CONFIG.crop, // Ensure crop config is applied
   };
-
-  const handleDragStart = (clientX: number, clientY: number) => {
-    setDragState({
-      isDragging: true,
-      startX: clientX,
-      startY: clientY,
-      startPositionX: position.x,
-      startPositionY: position.y
-    });
-  };
-
-  const handleDragMove = (clientX: number, clientY: number) => {
-    if (!dragState.isDragging) return;
-
-    const deltaX = clientX - dragState.startX;
-    const deltaY = clientY - dragState.startY;
-    const sensitivity = 0.5;
-
-    updatePosition({
-      x: dragState.startPositionX + deltaX * sensitivity,
-      y: dragState.startPositionY + deltaY * sensitivity
-    });
-  };
-
-  const handleDragEnd = () => {
-    setDragState(prev => ({ ...prev, isDragging: false }));
-  };
-
-  // Mouse event handlers
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    handleDragStart(e.clientX, e.clientY);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    e.preventDefault();
-    handleDragMove(e.clientX, e.clientY);
-  };
-
-  const handleMouseUp = (e: React.MouseEvent) => {
-    e.preventDefault();
-    handleDragEnd();
-  };
-
-  // Touch event handlers
-  const handleTouchStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    handleDragStart(touch.clientX, touch.clientY);
-
-    // Set up long press for showing controls
-    touchTimeoutRef.current = setTimeout(() => {
-      setShowControls(true);
-    }, 500);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    handleDragMove(touch.clientX, touch.clientY);
-
-    // Clear long press timeout if moving
-    if (touchTimeoutRef.current) {
-      clearTimeout(touchTimeoutRef.current);
-    }
-  };
-
-  const handleTouchEnd = () => {
-    handleDragEnd();
-    if (touchTimeoutRef.current) {
-      clearTimeout(touchTimeoutRef.current);
-    }
-  };
-
-  const resetPosition = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    updatePosition(DEFAULT_POSITION);
-  };
-
-  const STEP = 10;
-  const ZOOM_STEP = 0.1;
-
-  const controlButtons = [
-    { icon: ArrowUp, onClick: () => updatePosition({ y: position.y - STEP }), label: 'Move Up' },
-    { icon: ArrowDown, onClick: () => updatePosition({ y: position.y + STEP }), label: 'Move Down' },
-    { icon: ArrowLeft, onClick: () => updatePosition({ x: position.x - STEP }), label: 'Move Left' },
-    { icon: ArrowRight, onClick: () => updatePosition({ x: position.x + STEP }), label: 'Move Right' },
-    { icon: ZoomIn, onClick: () => updatePosition({ zoom: position.zoom + ZOOM_STEP }), label: 'Zoom In' },
-    { icon: ZoomOut, onClick: () => updatePosition({ zoom: position.zoom - ZOOM_STEP }), label: 'Zoom Out' },
-  ];
 
   return (
-    <div className="relative group">
-      <div
-        ref={containerRef}
-        className="relative cursor-move w-[450px] h-[550px] max-w-[450px] max-h-[550px] min-h-[350px] flex items-center justify-center overflow-hidden"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        <CldImage
-          key={`${public_id}-${position.x}-${position.y}-${position.zoom}`}
-          src={secure_url}
-          alt={alt}
-          width={450}
-          height={550}
-          crop="fill"
-          gravity={`xy_center,x_${position.x},y_${position.y}`}
-          zoom={position.zoom}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="w-auto h-auto max-w-full max-h-[550px] hover:opacity-90 transition-opacity duration-200 rounded-sm select-none"
-          priority={true}
-        />
-      </div>
-
-      {type === 'view' && (
-        <>
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 flex gap-2">
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowPreview(true);
-              }}
-            >
-              <Maximize2 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowControls(!showControls);
-              }}
-            >
-              <Settings2 className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {showControls && (
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/80 p-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <div className="grid grid-cols-4 gap-2">
-                {controlButtons.map((button, index) => (
-                  <Button
-                    key={index}
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-white hover:bg-white/20"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      button.onClick();
-                    }}
-                  >
-                    <button.icon className="h-4 w-4" />
-                  </Button>
-                ))}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-white hover:bg-white/20"
-                  onClick={resetPosition}
-                >
-                  <RotateCcw className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-
-          <Dialog open={showPreview} onOpenChange={setShowPreview}>
-            <DialogContent className="max-w-screen-lg">
-              <DialogHeader>
-                <DialogTitle>Original Image</DialogTitle>
-              </DialogHeader>
-              <div className="relative w-full h-full flex items-center justify-center">
-                <CldImage
-                  src={secure_url}
-                  alt={alt}
-                  width={800}
-                  height={800}
-                  crop="limit"
-                  className="w-auto h-auto max-w-full max-h-[80vh] rounded-sm"
-                />
-              </div>
-            </DialogContent>
-          </Dialog>
-        </>
-      )}
+    <div onClick={onClick} className={containerClasses}>
+      <CldImage
+        key={public_id}
+        src={secure_url}
+        alt={alt}
+        width={config.width}
+        height={config.height}
+        {...config} // Pass all configurations, including `crop`
+        className={imageClasses}
+        {...props}
+      />
     </div>
   );
 };
-
-export default ImageDisplay;

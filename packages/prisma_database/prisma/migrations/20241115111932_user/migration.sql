@@ -36,6 +36,20 @@ CREATE TABLE "Image" (
 );
 
 -- CreateTable
+CREATE TABLE "ImagePosition" (
+    "id" SERIAL NOT NULL,
+    "image_id" TEXT NOT NULL,
+    "index" INTEGER NOT NULL,
+    "position_x" INTEGER NOT NULL,
+    "position_y" INTEGER NOT NULL,
+    "zoom" DOUBLE PRECISION NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ImagePosition_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Email_token" (
     "token" TEXT NOT NULL,
     "userId" TEXT NOT NULL
@@ -55,6 +69,12 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_phone_key" ON "User"("phone");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ImagePosition_image_id_key" ON "ImagePosition"("image_id");
+
+-- CreateIndex
+CREATE INDEX "ImagePosition_image_id_idx" ON "ImagePosition"("image_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Email_token_userId_key" ON "Email_token"("userId");
